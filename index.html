@@ -26,14 +26,14 @@
 <header class="top">
   <a class="wordmark" href="#today">study<span class="fl">flex</span></a>
   <nav class="tabs">
-    <a href="#today">today</a>
-    <a href="#cards">cards</a>
-    <a href="#skills">skills</a>
-    <a href="#stats">stats</a>
+    <a href="#today" data-tip="review what is due today">today</a>
+    <a href="#cards" data-tip="browse, add, edit, and share cards">cards</a>
+    <a href="#skills" data-tip="how solid each skill is, weakest first, plus brain dumps">skills</a>
+    <a href="#stats" data-tip="streaks, badges, charts, settings, and sync">stats</a>
   </nav>
   <div class="top-right">
-    <span class="chip" id="streak-chip" hidden>streak <span class="hot" id="streak-n">0</span></span>
-    <button class="ghost" id="theme-btn" title="switch theme">theme</button>
+    <span class="chip" id="streak-chip" data-tip="days in a row with at least one review. every seventh day banks a freeze that quietly covers a missed day" hidden>streak <span class="hot" id="streak-n">0</span></span>
+    <button class="ghost" id="theme-btn" data-tip="light, dark, or follow the system">theme: auto</button>
   </div>
 </header>
 
@@ -41,25 +41,36 @@
 
 <section id="view-today" aria-label="today">
   <div id="today-idle">
+    <div class="panel welcome" id="welcome" hidden>
+      <h2 class="eyebrow">first time here</h2>
+      <p>Three things and you are set. Every card regenerates, so you learn the
+      method instead of the answer. You type your answers and they are checked
+      as math or text, with typos forgiven. Then you come back tomorrow, and the
+      schedule does the rest.</p>
+      <p class="welcome-row">
+        <button class="primary" id="welcome-go">start with five cards</button>
+        <button class="plain" id="welcome-dismiss">got it</button>
+        <span class="fine">hover anything to see what it does. press ? for the keys.</span>
+      </p>
+    </div>
     <div class="panel today-hero">
       <h1 id="hero-line">Ready when you are.</h1>
-      <p class="counts"><b id="n-due">0</b> due &nbsp;·&nbsp; <b id="n-new">0</b> new</p>
+      <p class="counts"><span data-tip="cards the schedule wants today"><b id="n-due">0</b> due</span> &nbsp;·&nbsp; <span data-tip="cards you have never seen, up to the daily allowance in settings"><b id="n-new">0</b> new</span></p>
       <div class="start-row">
-        <button class="primary" id="start-btn">start reviewing</button>
-        <button class="plain" id="five-btn" title="a tiny session for a low day: five cards, streak intact">just five</button>
+        <button class="primary" id="start-btn" data-tip="everything due today, then new cards up to your daily allowance">start reviewing</button>
+        <button class="plain" id="five-btn" data-tip="a tiny session for a low day: five cards, streak intact">just five</button>
         <span class="lock-group">
-          <button class="plain" id="lock-btn">lock in</button>
-          <select id="lock-mins" title="minutes on the clock" aria-label="lock in length">
+          <button class="plain" id="lock-btn" data-tip="a timed session. when the due queue runs dry, your weakest material comes back as practice until the clock runs out">lock in</button>
+          <select id="lock-mins" data-tip="minutes on the clock" aria-label="lock in length">
             <option value="15">15m</option>
             <option value="25" selected>25m</option>
             <option value="50">50m</option>
           </select>
         </span>
       </div>
-      <p class="fine lock-note">lock in keeps going past your due cards: when the queue runs dry, your weakest material comes back for practice until the clock runs out</p>
       <p class="exam-line mono" id="exam-line" hidden></p>
       <div id="readiness" class="readiness" hidden></div>
-      <div class="load-bars" id="load-bars" title="reviews coming due over the next two weeks" aria-hidden="true"></div>
+      <div class="load-bars" id="load-bars" data-tip="reviews coming due over the next two weeks" aria-hidden="true"></div>
       <p class="fine load-caption" aria-hidden="true">the next two weeks</p>
     </div>
 
@@ -89,7 +100,8 @@
     <div class="review">
       <div class="session-top">
         <div class="progress" id="progress" role="progressbar" aria-label="session progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="progress-bar"></i></div>
-        <button class="ghost" id="undo-btn" title="take back the last answer (u)" hidden>undo</button>
+        <span class="session-count" id="session-count"></span>
+        <button class="ghost" id="undo-btn" data-tip="take back the last answer: memory state, log, and the card (u)" hidden>undo</button>
         <span class="chip lock-chip" id="lock-chip" role="timer" aria-label="lock in time left" hidden>25:00</span>
       </div>
       <div class="panel review-card" id="review-card">
@@ -99,24 +111,25 @@
         <div id="answer-area"></div>
         <p class="parse-note" id="parse-note" aria-live="polite"></p>
         <div class="hint-row">
-          <button class="plain" id="hint-btn">hint</button>
+          <button class="plain" id="hint-btn" data-tip="a nudge. the grade becomes hard even if you then get it right (h)">hint</button>
           <span class="hint-text" id="hint-text"></span>
         </div>
         <div class="outcome" id="outcome" hidden>
           <p class="verdict" id="verdict" aria-live="assertive"></p>
           <div class="solution" id="solution"></div>
           <div class="grade-row" id="grade-row">
-            <span class="lead">graded</span>
-            <button class="grade g1" data-g="1">again<small>1</small></button>
-            <button class="grade g2" data-g="2">hard<small>2</small></button>
-            <button class="grade g3" data-g="3">good<small>3</small></button>
-            <button class="grade g4" data-g="4">easy<small>4</small></button>
+            <span class="lead" id="grade-lead">graded</span>
+            <button class="grade g1" data-g="1" data-tip="wrong, or you want it back soon. it returns later this session">again<small>1</small></button>
+            <button class="grade g2" data-g="2" data-tip="right, but with a hint or slowly. the next gap stays short">hard<small>2</small></button>
+            <button class="grade g3" data-g="3" data-tip="right at a normal pace. the standard gap">good<small>3</small></button>
+            <button class="grade g4" data-g="4" data-tip="right and quick. a longer gap">easy<small>4</small></button>
             <span class="spacer" style="flex:1"></span>
-            <button class="primary" id="next-btn">next</button>
+            <button class="primary" id="next-btn" data-tip="save the grade and move on (enter)">next</button>
           </div>
         </div>
       </div>
     </div>
+    <p class="fine keys-hint">enter checks · h hints · u undoes · esc ends · ? shows every key</p>
   </div>
 
   <div id="today-done" hidden>
@@ -131,15 +144,17 @@
 
 <section id="view-cards" aria-label="cards" hidden>
   <div class="toolbar">
-    <button class="primary" id="notes-btn">add from notes</button>
-    <button class="plain" id="new-card-btn">new card</button>
-    <button class="plain" id="import-btn">import deck</button>
-    <button class="plain" id="export-deck-btn">export my cards</button>
-    <button class="plain" id="share-btn" title="copy a link that carries your cards">share link</button>
+    <button class="primary" id="notes-btn" data-tip="paste notes, mark the words to hide, get cloze cards. or let AI draft them">add from notes</button>
+    <button class="plain" id="new-card-btn" data-tip="write a template by hand, with a live preview">new card</button>
+    <button class="plain" id="import-btn" data-tip="load a deck file someone exported">import deck</button>
+    <button class="plain" id="export-deck-btn" data-tip="download your own cards as a deck file">export my cards</button>
+    <button class="plain" id="share-btn" data-tip="copy a link that carries your cards inside it, no server involved">share link</button>
     <span class="spacer"></span>
-    <input type="search" id="card-search" placeholder="search cards" aria-label="search cards" autocomplete="off">
+    <input type="search" id="card-search" placeholder="search cards" aria-label="search cards" data-tip="filter by name, skill, or deck" autocomplete="off">
     <span class="fine" id="card-count"></span>
   </div>
+
+  <p class="note" id="cards-hint" hidden>These are the two built-in decks. Your own cards come in through add from notes, about thirty seconds each, and show up here tagged edited.</p>
 
   <div class="panel" id="notes-panel" hidden>
     <h2 class="eyebrow">add from notes</h2>
@@ -148,10 +163,10 @@
         <label for="notes-text">paste your notes &nbsp;<span class="fine" style="text-transform:none;letter-spacing:0">or drop in a .txt / .md file</span></label>
         <textarea id="notes-text" rows="10" placeholder="Paste lecture notes, a summary sheet, definitions, anything."></textarea>
         <p style="margin: 0.6rem 0 0;">
-          <button class="plain" id="notes-file-btn">load a file</button>
-          <button class="plain" id="notes-mark-btn" title="wrap the selected words in [[ ]]">mark selection</button>
-          <button class="plain" id="notes-make-btn" title="every line with [[marks]] becomes one cloze card">cards from marked lines</button>
-          <button class="plain" id="notes-ai-btn">draft cards with AI</button>
+          <button class="plain" id="notes-file-btn" data-tip="a .txt or .md file goes into the box">load a file</button>
+          <button class="plain" id="notes-mark-btn" data-tip="wrap the selected words in [[ ]]. the app hides one mark per review">mark selection</button>
+          <button class="plain" id="notes-make-btn" data-tip="every line with [[marks]] becomes one cloze card">cards from marked lines</button>
+          <button class="plain" id="notes-ai-btn" data-tip="sends this paste to Claude with your own API key and proposes cards you approve one by one">draft cards with AI</button>
         </p>
         <label for="notes-skills">skill tags for these cards</label>
         <input type="text" id="notes-skills" placeholder="bio: cell respiration">
@@ -236,7 +251,7 @@
   </div>
   <div class="panel">
     <table class="cards" id="cards-table">
-      <thead><tr><th>card</th><th>skills</th><th>state</th><th>due</th><th class="actions"></th></tr></thead>
+      <thead><tr><th>card</th><th>skills</th><th data-tip="stability: how many days the memory model expects this card to hold before recall drops to 90%">state</th><th data-tip="when the schedule asks for it next">due</th><th class="actions"></th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
@@ -252,7 +267,7 @@
       you what you actually have instead of what feels familiar.</p>
       <p>
         <select id="dump-skill" aria-label="topic to dump"></select>
-        <button class="primary" id="dump-start">start the clock</button>
+        <button class="primary" id="dump-start" data-tip="three minutes on a blank page, then a list of what the topic covers">start the clock</button>
       </p>
     </div>
     <div id="dump-live" hidden>
@@ -274,22 +289,24 @@
     <p class="note">Strength is the chance you would get the skill's cards
     right now, from the scheduler's memory model. It decays between reviews,
     which is the point: this list is what to worry about before an exam.</p>
+    <p class="note" id="skills-empty" hidden>Nothing studied yet. One session and this page fills in.</p>
     <div id="skills-list"></div>
   </div>
 </section>
 
 <section id="view-stats" aria-label="stats" hidden>
+  <p class="note" id="stats-empty" hidden>Charts, records, and badges appear after your first review.</p>
   <div class="stat-chips">
-    <div class="panel"><div class="k">streak</div><div class="v" id="st-streak">0 <small>days</small></div></div>
-    <div class="panel"><div class="k">reviews</div><div class="v" id="st-total">0</div></div>
-    <div class="panel"><div class="k">cards</div><div class="v" id="st-cards">0</div></div>
-    <div class="panel"><div class="k">last 7 days</div><div class="v" id="st-acc">&ndash;</div></div>
+    <div class="panel"><div class="k" data-tip="days in a row with a review. frozen days count">streak</div><div class="v" id="st-streak">0 <small>days</small></div></div>
+    <div class="panel"><div class="k" data-tip="graded reviews. practice reps are not counted">reviews</div><div class="v" id="st-total">0</div></div>
+    <div class="panel"><div class="k" data-tip="built-in decks plus your own">cards</div><div class="v" id="st-cards">0</div></div>
+    <div class="panel"><div class="k" data-tip="share of graded answers that were right this week">last 7 days</div><div class="v" id="st-acc">&ndash;</div></div>
   </div>
   <div class="stat-chips">
     <div class="panel"><div class="k">longest streak</div><div class="v" id="st-longest">0 <small>days</small></div></div>
     <div class="panel"><div class="k">best day</div><div class="v" id="st-best">0 <small>reviews</small></div></div>
-    <div class="panel"><div class="k">locked in</div><div class="v" id="st-focus">0 <small>min</small></div></div>
-    <div class="panel"><div class="k">streak freezes</div><div class="v" id="st-freezes">0 <small>banked</small></div></div>
+    <div class="panel"><div class="k" data-tip="minutes spent in lock-in sessions, all time">locked in</div><div class="v" id="st-focus">0 <small>min</small></div></div>
+    <div class="panel"><div class="k" data-tip="earned every seven straight days, spent automatically on a missed day. two fit in the bank">streak freezes</div><div class="v" id="st-freezes">0 <small>banked</small></div></div>
   </div>
   <div class="panel">
     <h2 class="eyebrow">badges</h2>
@@ -313,7 +330,7 @@
     <div id="sync-setup">
       <p class="note">Optional. Your reviews and cards sync through a free
       Supabase project that you own; this app has no server of its own. The
-      <a href="https://github.com/MathMaster1296/studyflex#sync-between-devices">readme</a>
+      <a href="https://github.com/prathammukewar/studyflex#sync-between-devices">readme</a>
       has the three-step setup, then paste the project's URL and anon key here.</p>
       <div class="settings-row">
         <div>
@@ -324,7 +341,7 @@
           <label for="sync-key">anon key</label>
           <input type="password" id="sync-key" placeholder="eyJ..." autocomplete="off">
         </div>
-        <div><button class="plain" id="sync-save">save</button></div>
+        <div><button class="plain" id="sync-save" data-tip="remember this project on this device">save</button></div>
       </div>
     </div>
     <div id="sync-auth" hidden>
@@ -337,15 +354,15 @@
           <label for="sync-pass">password</label>
           <input type="password" id="sync-pass" autocomplete="off">
         </div>
-        <div><button class="primary" id="sync-signin">sign in</button></div>
-        <div><button class="plain" id="sync-signup">create account</button></div>
+        <div><button class="primary" id="sync-signin" data-tip="pull what other devices pushed, and push what this one has">sign in</button></div>
+        <div><button class="plain" id="sync-signup" data-tip="the account lives in your own Supabase project, not with us">create account</button></div>
         <div><button class="plain" id="sync-reset">change project</button></div>
       </div>
     </div>
     <div id="sync-on" hidden>
       <div class="settings-row">
         <div><span class="chip">syncing as <span class="hot" id="sync-user"></span></span></div>
-        <div><button class="plain" id="sync-now">sync now</button></div>
+        <div><button class="plain" id="sync-now" data-tip="sync also runs on its own after each session">sync now</button></div>
         <div><button class="plain" id="sync-out">sign out</button></div>
       </div>
     </div>
@@ -362,11 +379,11 @@
     <h2 class="eyebrow">settings</h2>
     <div class="settings-row">
       <div>
-        <label for="set-new">new cards per day</label>
+        <label for="set-new" data-tip="how many never-seen cards join each day. five is plenty while a deck is fresh">new cards per day</label>
         <input type="number" id="set-new" min="0" max="50">
       </div>
       <div>
-        <label for="set-ret">target retention</label>
+        <label for="set-ret" data-tip="the recall probability the schedule aims for at each review. higher means more reviews and fewer surprises">target retention</label>
         <select id="set-ret">
           <option value="0.8">0.80 relaxed</option>
           <option value="0.85">0.85</option>
@@ -376,16 +393,16 @@
         </select>
       </div>
       <div>
-        <label for="set-cozy">easier reading</label>
+        <label for="set-cozy" data-tip="a plain sans face with more air between letters and lines">easier reading</label>
         <label class="check"><input type="checkbox" id="set-cozy"> plain font, wider spacing</label>
       </div>
       <div>
         <label for="set-key">anthropic api key, for drafting cards from notes</label>
         <input type="password" id="set-key" placeholder="sk-ant-..." autocomplete="off">
       </div>
-      <div><button class="plain" id="export-all-btn">export everything</button></div>
-      <div><button class="plain" id="import-all-btn">restore from export</button></div>
-      <div><button class="plain danger" id="wipe-btn">erase all data</button></div>
+      <div><button class="plain" id="export-all-btn" data-tip="one file with everything on this device, minus your API key">export everything</button></div>
+      <div><button class="plain" id="import-all-btn" data-tip="replace everything here with an export file">restore from export</button></div>
+      <div><button class="plain danger" id="wipe-btn" data-tip="every card, edit, and review on this device. exports are the only way back">erase all data</button></div>
     </div>
     <p class="fine" style="margin-top: 0.9rem;">everything lives in this browser's local storage. <span id="backup-line"></span></p>
   </div>
@@ -393,6 +410,7 @@
 
 </main>
 
+<div id="tip" role="tooltip" hidden></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="keys-overlay" role="dialog" aria-modal="true" aria-label="keyboard shortcuts" hidden>
   <div class="keys-card">
@@ -414,7 +432,7 @@
 <footer>
   <span>studyflex</span>
   <span>no account needed, and nothing leaves your browser unless you turn on sync</span>
-  <a href="https://github.com/MathMaster1296/studyflex">source</a>
+  <a href="https://github.com/prathammukewar/studyflex">source</a>
 </footer>
 
 <script src="vendor/katex.min.js"></script>

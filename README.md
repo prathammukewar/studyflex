@@ -4,7 +4,7 @@ Spaced repetition for problem solving, in the browser. Every card is a
 template: the numbers are drawn fresh on every review, so the method is the
 only thing you can memorize.
 
-**Live at [mathmaster1296.github.io/studyflex](https://mathmaster1296.github.io/studyflex/).**
+**Live at [prathammukewar.github.io/studyflex](https://prathammukewar.github.io/studyflex/).**
 
 Three years ago I made a study app called StudyFlex, and even I did not use
 it. This one is built around the two reasons that happened.

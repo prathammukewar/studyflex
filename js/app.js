@@ -56,8 +56,57 @@ function toast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  toastTimer = setTimeout(() => el.classList.remove('show'), Math.max(2600, msg.length * 45));
 }
+
+// ---------- tooltips ----------
+// Anything with data-tip explains itself on hover or keyboard focus,
+// without the one-second wait a native title makes you sit through.
+
+const tip = $('tip');
+let tipTimer = 0, tipTarget = null;
+
+function showTip(el) {
+  tipTarget = el;
+  tip.textContent = el.dataset.tip;
+  tip.hidden = false;
+  tip.style.left = '0px';
+  tip.style.top = '0px';
+  const r = el.getBoundingClientRect();
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  const left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 8));
+  let top = r.bottom + 8;
+  if (top + h > innerHeight - 8) top = r.top - h - 8;
+  tip.style.left = `${left}px`;
+  tip.style.top = `${top}px`;
+  void tip.offsetWidth; // commit the hidden state before fading in
+  tip.classList.add('show');
+}
+
+function hideTip() {
+  clearTimeout(tipTimer);
+  tipTarget = null;
+  tip.classList.remove('show');
+  tip.hidden = true;
+}
+
+document.addEventListener('mouseover', ev => {
+  const el = ev.target.closest('[data-tip]');
+  if (!el || el === tipTarget) return;
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(() => showTip(el), 140);
+});
+document.addEventListener('mouseout', ev => {
+  const el = ev.target.closest('[data-tip]');
+  if (el && !el.contains(ev.relatedTarget)) hideTip();
+});
+document.addEventListener('focusin', ev => {
+  const el = ev.target.closest('[data-tip]');
+  if (el) showTip(el);
+});
+document.addEventListener('focusout', hideTip);
+document.addEventListener('click', hideTip, true);
+window.addEventListener('scroll', hideTip, { passive: true });
 
 function persist() {
   save(state);
@@ -179,7 +228,7 @@ function applyTheme() {
   const t = state.settings.theme;
   if (t === 'auto') delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = t;
-  $('theme-btn').textContent = t;
+  $('theme-btn').textContent = `theme: ${t}`;
 }
 $('theme-btn').addEventListener('click', () => {
   const order = ['auto', 'light', 'dark'];
@@ -236,6 +285,8 @@ function renderIdle() {
   $('n-new').textContent = fresh.length;
   const none = due.length + fresh.length === 0;
   const seen = Object.values(state.templates).some(e => !e.suspended && !fsrs.isNew(e.srs));
+  const brandNew = !state.settings.seenWelcome && !state.logs.some(l => l.id && !l.practice);
+  $('welcome').hidden = !brandNew;
   $('start-btn').disabled = none;
   $('five-btn').disabled = none;
   $('lock-btn').disabled = none && !seen;
@@ -265,7 +316,7 @@ function renderIdle() {
     const b = document.createElement('span');
     b.style.height = `${Math.round(100 * c / max)}%`;
     if (i === 0) b.className = 'now';
-    b.title = i === 0 ? `today: ${c}` : `+${i}d: ${c}`;
+    b.dataset.tip = i === 0 ? `today: ${c}` : `+${i}d: ${c}`;
     bars.appendChild(b);
   });
   renderExamLine(now);
@@ -325,6 +376,7 @@ const ui = {
 };
 
 function startSession(lockMins = 0, opts = {}) {
+  state.settings.seenWelcome = true;
   session = new Session(state, Date.now(), opts);
   ui.lockUntil = lockMins ? Date.now() + lockMins * 60000 : 0;
   if (!session.remaining && ui.lockUntil) session.refill(Date.now());
@@ -368,6 +420,7 @@ function showCard() {
   const pct = Math.round(100 * session.done.length / Math.max(1, session.total));
   $('progress-bar').style.width = `${pct}%`;
   $('progress').setAttribute('aria-valuenow', pct);
+  $('session-count').textContent = `${Math.min(session.results.length + 1, session.total)} of ${session.total}`;
 
   const card = $('review-card');
   card.classList.remove('session-card-enter');
@@ -607,7 +660,16 @@ function finishAnswer(ok) {
     b.classList.toggle('on', Number(b.dataset.g) === ui.grade);
     b.hidden = hideGrades;
   });
-  document.querySelector('.grade-row .lead').hidden = ui.practice;
+  const par = tpl.par || 60;
+  const secs = (ms / 1000).toFixed(0);
+  $('grade-lead').textContent = selfGraded
+    ? 'grade yourself honestly'
+    : !ok ? 'again: it comes back later this session'
+    : ui.hintsUsed ? 'hard: right, but with a hint'
+    : ms > 1.5 * par * 1000 ? `hard: right, but ${secs}s against a par of ${par}s`
+    : ms <= 0.6 * par * 1000 ? `easy: ${secs}s against a par of ${par}s`
+    : `good: ${secs}s against a par of ${par}s`;
+  $('grade-lead').hidden = ui.practice;
   $('next-btn').textContent = selfGraded ? 'grade with 1-4' : 'next';
   $('next-btn').disabled = selfGraded;
   $('outcome').hidden = false;
@@ -694,6 +756,8 @@ function endSession() {
 }
 
 $('start-btn').addEventListener('click', () => startSession(0));
+$('welcome-go').addEventListener('click', () => startSession(0, { cap: 5 }));
+$('welcome-dismiss').addEventListener('click', () => { state.settings.seenWelcome = true; persist(); renderIdle(); });
 $('five-btn').addEventListener('click', () => startSession(0, { cap: 5 }));
 $('lock-btn').addEventListener('click', () => startSession(Number($('lock-mins').value)));
 $('undo-btn').addEventListener('click', undoLast);
@@ -769,6 +833,7 @@ function renderCards() {
   $('card-count').textContent = query
     ? `${entries.length} of ${all.length} cards`
     : `${all.length} cards`;
+  $('cards-hint').hidden = all.some(e => e.custom);
   for (const e of entries) {
     const tr = document.createElement('tr');
     if (e.suspended) tr.className = 'suspended';
@@ -1278,6 +1343,7 @@ function renderSkills() {
     name, ...r,
     strength: r.seen.length ? r.seen.reduce((a, b) => a + b, 0) / r.seen.length : null,
   })).sort((a, b) => (a.strength ?? 2) - (b.strength ?? 2));
+  $('skills-empty').hidden = rows.some(r => r.strength !== null);
   for (const r of rows) {
     const div = document.createElement('div');
     div.className = 'skill-row';
@@ -1294,7 +1360,7 @@ function renderSkills() {
       const drill = document.createElement('button');
       drill.className = 'plain';
       drill.textContent = 'drill';
-      drill.title = 'practice this skill now; the schedule is not touched';
+      drill.dataset.tip = 'practice this skill now, weakest cards first. the schedule is not touched';
       drill.addEventListener('click', () => {
         location.hash = '#today';
         startSession(0, { practiceSkill: r.name, cap: 10 });
@@ -1356,7 +1422,7 @@ function renderStats() {
     ? `${(focused / 60).toFixed(1)} <small>hours</small>`
     : `${focused} <small>min</small>`;
   $('st-freezes').innerHTML = `${state.gamify.freezes} <small>banked</small>`;
-  $('st-freezes').title = `earn one per ${FREEZE_EVERY} streak days; a freeze quietly covers a missed day`;
+  $('stats-empty').hidden = graded.length > 0;
 
   const { earned } = checkBadges(state, now, currentStreak);
   const wall = $('badges');
@@ -1365,7 +1431,7 @@ function renderStats() {
     const chip = document.createElement('span');
     chip.className = `badge-chip${earned.includes(b.id) ? ' earned' : ''}`;
     chip.textContent = b.name;
-    chip.title = b.desc;
+    chip.dataset.tip = b.desc;
     wall.appendChild(chip);
   }
 
@@ -1436,7 +1502,7 @@ function renderHeatmap(now) {
     const n = byDay[dayOf(t)] || 0;
     if (t > now) cell.className = 'future';
     else if (n > 0) cell.className = `l${Math.min(4, Math.ceil(n / 8))}`;
-    cell.title = `${dayOf(t)}: ${n} review${n === 1 ? '' : 's'}`;
+    cell.dataset.tip = `${dayOf(t)}: ${n} review${n === 1 ? '' : 's'}`;
     box.appendChild(cell);
     const d = new Date(t + DAY);
     if (t >= now && d.getDay() === 0) break;
@@ -1453,6 +1519,7 @@ function renderExamSettings() {
     label.textContent = deckName(id);
     const input = document.createElement('input');
     input.type = 'date';
+    input.dataset.tip = 'nothing in this deck gets scheduled past this day';
     const t = state.settings.exams?.[id];
     if (t) input.value = dayOf(t);
     input.addEventListener('change', () => {

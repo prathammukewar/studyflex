@@ -3,7 +3,7 @@
 // (and on a plane), and picks up a deploy one load later.
 // Bump VERSION with any deploy so old caches get swept.
 
-const VERSION = 'studyflex-v7';
+const VERSION = 'studyflex-v8';
 const CORE = [
   '.',
   'index.html',
