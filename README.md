@@ -6,6 +6,8 @@ only thing you can memorize.
 
 **Live at [prathammukewar.github.io/studyflex](https://prathammukewar.github.io/studyflex/).**
 
+![A review card asking for the derivative of sin(4x). The typed answer 4cos(4x) is marked right, with the worked solution and the grade buttons under it](docs/session.png)
+
 Three years ago I made a study app called StudyFlex, and even I did not use
 it. This one is built around the two reasons that happened.
 
@@ -17,8 +19,9 @@ integration by parts. Here that card is a generator. Next time it comes up as
 x·e^(5x), and the only way through is the method. Prose subjects get the same
 treatment: a cloze card can hold several marked spans and hides a different
 one each review, so the sentence never becomes a fixed prompt with a fixed
-answer. Two decks ship built in: 22 calculus generators, and a deck that
-teaches the study techniques the app is built on, through the app itself.
+answer. Three decks ship built in: 24 calculus generators, nine introductory
+mechanics problems, and a deck that teaches the study techniques the app is
+built on, through the app itself.
 
 The second failure is grading yourself. "Was that easy or good?" is a
 negotiation, and the lazy answer compounds into a schedule built on wishful
@@ -200,6 +203,7 @@ date), the session queue, and deck integrity: every shipped card is drawn
 | `js/store.js` | localStorage persistence, streaks, export and import |
 | `js/decks/calc1.js` | the calculus seed deck |
 | `js/decks/techniques.js` | the how-to-study seed deck |
+| `js/decks/mech1.js` | the mechanics seed deck |
 | `js/ai.js` | drafting cards from notes with Claude, loaded only on use |
 | `js/gamify.js` | streak freezes, badges, records |
 | `js/sync.js` | optional sync against your own Supabase project |

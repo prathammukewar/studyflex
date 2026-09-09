@@ -3,6 +3,7 @@
 
 import { deck as calc1 } from './decks/calc1.js';
 import { deck as techniques } from './decks/techniques.js';
+import { deck as mech1 } from './decks/mech1.js';
 import * as fsrs from './fsrs.js';
 import { draw, fill, check, referenceText, validate, renderCloze, isProse } from './template.js';
 import { parse, toTex, stripConstant } from './expr.js';
@@ -20,7 +21,7 @@ import { randomSeed } from './rng.js';
 import { confetti } from './fx.js';
 import { applyFreezes, streakWithFreezes, earnFreezes, longestStreak, checkBadges, BADGES, FREEZE_EVERY, examReadiness } from './gamify.js';
 
-const SEED_DECKS = [calc1, techniques];
+const SEED_DECKS = [calc1, techniques, mech1];
 const $ = id => document.getElementById(id);
 const DAY = 86400000;
 
@@ -294,7 +295,8 @@ function renderIdle() {
   const lastReview = reviewDays.length ? Math.max(...reviewDays) : 0;
   const away = lastReview ? Math.floor((now - lastReview) / DAY) : 0;
   $('hero-line').textContent =
-    away >= 3 && !none
+    brandNew ? 'Flashcards where the numbers change.'
+    : away >= 3 && !none
       ? `Back after ${away} days. The curve forgave you; start small.`
     : none
       ? (seen ? 'Nothing due. Lock in anyway, or go live your life.' : 'Nothing due. Go live your life.')
@@ -743,6 +745,9 @@ function endSession() {
   if (practiced) bits.push(`${practiced} practice`);
   bits.push(locked ? `locked in ${locked} min` : `${s.minutes.toFixed(1)} min`);
   $('done-line').innerHTML = bits.join(' &nbsp;·&nbsp; ');
+  ui.lastRight = s.right;
+  ui.lastGraded = s.graded;
+  $('done-share-btn').hidden = !Object.values(state.templates).some(e => e.custom);
   confetti(fresh.length ? 1.8 : s.graded >= 10 ? 1.4 : 1);
   const list = $('done-skills');
   list.innerHTML = '';
@@ -1042,7 +1047,7 @@ $('export-deck-btn').addEventListener('click', () => {
 });
 
 // share your cards as a link, the way a pit run shares as a seed
-$('share-btn').addEventListener('click', async () => {
+async function shareCards() {
   const templates = Object.values(state.templates).filter(e => e.custom).map(e => e.tpl);
   if (!templates.length) { toast('no edited or custom cards to share yet'); return; }
   const encoded = shareEncode(templates);
@@ -1054,6 +1059,16 @@ $('share-btn').addEventListener('click', async () => {
   } catch {
     prompt('copy this link', url);
   }
+}
+$('share-btn').addEventListener('click', shareCards);
+$('done-share-btn').addEventListener('click', shareCards);
+
+// a one-line brag with the link, for the group chat
+$('brag-btn').addEventListener('click', async () => {
+  const days = streakWithFreezes(state, Date.now());
+  const line = `${days}-day streak on studyflex${ui.lastRight !== undefined ? ` · ${ui.lastRight}/${ui.lastGraded} right today` : ''} · flashcards where the numbers change: ${location.origin}${location.pathname}`;
+  try { await navigator.clipboard.writeText(line); toast('copied. paste it wherever the group chat lives.'); }
+  catch { prompt('copy this', line); }
 });
 
 function importFromHash() {

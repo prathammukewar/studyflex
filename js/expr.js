@@ -12,6 +12,7 @@ const FNS = {
   sinh: Math.sinh, cosh: Math.cosh, tanh: Math.tanh,
   ln: Math.log, log: Math.log, log10: Math.log10, log2: Math.log2,
   exp: Math.exp, sqrt: Math.sqrt, abs: Math.abs,
+  round: Math.round, floor: Math.floor, ceil: Math.ceil,
 };
 
 const CONSTS = { pi: Math.PI, e: Math.E, tau: 2 * Math.PI };

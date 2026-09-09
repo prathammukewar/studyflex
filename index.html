@@ -8,6 +8,9 @@
 <meta property="og:title" content="studyflex">
 <meta property="og:description" content="Spaced repetition for problem solving. Every card regenerates with new numbers, so the method is the only thing you can memorize.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://prathammukewar.github.io/studyflex/">
+<meta property="og:image" content="https://prathammukewar.github.io/studyflex/docs/card.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='3' y='4.5' width='11' height='8' rx='1.5' fill='%23b9b4a5'/><rect x='2' y='2.5' width='11' height='8' rx='1.5' fill='%23f7f5ef' stroke='%2322262d' stroke-width='1'/><path d='M4.5 6.5l2 2 3.5-3.5' stroke='%232f7d46' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -137,7 +140,11 @@
       <h1>Done for today.</h1>
       <p class="counts" id="done-line"></p>
       <div id="done-skills" style="max-width: 420px; margin: 0 auto;"></div>
-      <p style="margin-top: 1.4rem;"><button class="plain" id="back-btn">back to today</button></p>
+      <p class="done-actions">
+        <button class="plain" id="back-btn">back to today</button>
+        <button class="plain" id="brag-btn" data-tip="copies a one-line summary with the link">copy a brag</button>
+        <button class="plain" id="done-share-btn" data-tip="copies a link that carries your own cards" hidden>send your cards to a classmate</button>
+      </p>
     </div>
   </div>
 </section>

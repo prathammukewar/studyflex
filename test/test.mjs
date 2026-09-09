@@ -15,6 +15,7 @@ import { rebuildSrs } from '../js/store.js';
 import { startMock } from './mock-supabase.mjs';
 import { deck as calc1 } from '../js/decks/calc1.js';
 import { deck as techniques } from '../js/decks/techniques.js';
+import { deck as mech1 } from '../js/decks/mech1.js';
 
 let passed = 0, failed = 0;
 function ok(cond, name) {
@@ -45,6 +46,7 @@ near(evalIn('1/2x', { x: 4 }), 2, '1/2x reads as (1/2)x');
 near(evalIn('sqrt(2)/2'), Math.SQRT1_2, 'sqrt');
 near(evalIn('x**2', { x: 3 }), 9, '** works as ^');
 near(evalIn('sec(0)'), 1, 'sec');
+near(evalIn('round(2.0203*100)/100'), 2.02, 'round for tidy displays');
 throws(() => parse('sin x'), 'functions need parentheses');
 throws(() => parse('3 + '), 'dangling operator');
 throws(() => parse('y + 1', ['x']), 'unknown names are rejected');
@@ -183,7 +185,7 @@ ok(!textMatch('', ['anything']), 'empty input rejected');
 
 // ---------- deck integrity ----------
 
-for (const deck of [calc1, techniques]) {
+for (const deck of [calc1, techniques, mech1]) {
   for (const tpl of deck.templates) {
     const problems = validate(tpl);
     ok(problems.length === 0, `deck card ${tpl.id}: ${problems.join('; ')}`);
@@ -193,7 +195,7 @@ for (const deck of [calc1, techniques]) {
   }
 }
 {
-  const ids = [...calc1.templates, ...techniques.templates].map(t => t.id);
+  const ids = [...calc1.templates, ...techniques.templates, ...mech1.templates].map(t => t.id);
   ok(new Set(ids).size === ids.length, 'deck ids are unique');
 }
 
