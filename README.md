@@ -8,8 +8,8 @@ only thing you can memorize.
 
 ![A review card asking for the derivative of sin(4x). The typed answer 4cos(4x) is marked right, with the worked solution and the grade buttons under it](docs/session.png)
 
-Three years ago I made a study app called StudyFlex, and even I did not use
-it. This one is built around the two reasons that happened.
+I built StudyFlex for myself, because ordinary flashcards fail at math in two
+specific ways. The whole app is aimed at those two.
 
 ## Why this exists
 
